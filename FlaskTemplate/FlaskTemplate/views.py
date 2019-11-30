@@ -5,7 +5,6 @@ Routes and views for the flask application.
 from datetime import datetime
 from flask import render_template,jsonify,request
 from FlaskTemplate import app,lm
-<<<<<<< HEAD
 from .models import User,db,Question,Answers,Block
 
 
@@ -39,10 +38,6 @@ def get_block_info():
         else:
             output_data = jsonify({'ERROR':'Block doesnt exist'})
             return output_data
-
-
-=======
-from .models import User,db,Question,Answers
 
 
 @app.route('/')
@@ -86,7 +81,6 @@ def create_question():
         db.session.add(q)
         db.session.commit()
         return jsonify(data)
->>>>>>> f4ccbe5e6829eebe68a7539a89cf10744ed50963
 @app.route('/api/get_question',methods=['POST'])
 def get_question():
     if(request.method=='POST'):
@@ -108,7 +102,6 @@ def get_question():
 #@app.route('/login_check')
 #def check_login():
 
-<<<<<<< HEAD
 #@app.route('/check')
 #def check():
 #   u = User(username="admin1232",email="admin123")
@@ -140,7 +133,6 @@ def get_tablescore():
     output_data.update({'count_of_users':count_of_users})
     return jsonify(output_data)
 
-=======
 @app.route('/check')
 def check():
    u = User(username="admin1232",email="admin123")
@@ -150,5 +142,4 @@ def check():
 @lm.user_loader
 def load_user(user_id):
     return User.query.filter_by(id=user_id).first()
->>>>>>> f4ccbe5e6829eebe68a7539a89cf10744ed50963
 
