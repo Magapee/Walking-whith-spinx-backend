@@ -78,8 +78,14 @@ class Block(db.Model):
     questions = db.relationship('Question',backref='block',lazy='dynamic')
 
     def get_Questions(self):
+        count_of_questions = 0
+        output_data = {}
         for question in Question.query.filter_by(block_id=self.id):
-            #print(1)
-            return question.get_All()
+            count_of_questions+=1
+            output_data.update({str(count_of_questions):question.get_All()})
+        output_data.update({'count':count_of_questions})
+        return output_data
+
+
 
 db.create_all()
