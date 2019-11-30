@@ -1,4 +1,4 @@
-from FlaskTemplate import app
+from FlaskTemplate import app, lm
 from flask_sqlalchemy import SQLAlchemy 
 from .config import BaseConfig as Config
 from flask import jsonify
@@ -14,6 +14,14 @@ assosication_table = db.Table('association',db.Model.metadata,
                                         db.Column('block_id',db.Integer,db.ForeignKey('block.id'))
                                         )
 
+
+
+#lm callback
+@lm.user_loader
+def load_user(user_id):
+    return User.query.filter_by(id=user_id).first()
+
+
 class User(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     username = db.Column(db.String,unique = True)
@@ -21,9 +29,21 @@ class User(db.Model):
     score = db.Column(db.Integer,default=0)
     email = db.Column(db.String,unique=True)
     blocks = db.relationship('Block',backref='user_blocks',secondary=assosication_table,lazy='dynamic')
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
     #blocks = db.Column(db.Integer,db.ForeignKey('block.id'))
 
-
+    
 
     def ser(self):
         return jsonify({'id':self.id,'username':self.username,'email':self.email,

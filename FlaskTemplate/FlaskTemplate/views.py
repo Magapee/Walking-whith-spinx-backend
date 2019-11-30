@@ -118,11 +118,6 @@ def get_question():
 
 
 
-#ЛОГИН?????
-@lm.user_loader
-def load_user(user_id):
-    return User.query.filter_by(id=user_id).first()
-
 
 
 #ПРОВЕРКА ПОЛУЧЕННЫХ ОТВЕТОВ
@@ -158,7 +153,7 @@ def load_user(user_id):
 #    }
 #  }
 #}
-@app.route('/api/check_answers',methods=['POST'])
+@app.route('/api/check_answers', methods=['POST'])
 def check_answers():
     if (request.method == 'POST'):
         data = request.get_json()
@@ -299,11 +294,6 @@ def get_user_info():
 
 
 
-@lm.user_loader
-def load_user(user_id):
-    return User.query.filter_by(id=user_id).first()
-
-
 
 
 #def get_Active_blocks(username):
@@ -318,3 +308,22 @@ def load_user(user_id):
 #    return output_data
 
 
+
+#Registration
+@app.route('/api/registration', methods = ['POST'])
+def registration():
+    data = request.get_json()
+    try:
+        username = data['login']
+        email = data['email']
+        password = data['password']
+    except KeyError:
+        return jsonify({'ERROR':'Wrong data'})
+    
+    if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None:
+        return jsonify({'result':'0'})
+    
+    user = User(username=username, email=email, password_hash=password)
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({'result':'1'})
