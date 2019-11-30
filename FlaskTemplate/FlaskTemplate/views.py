@@ -94,25 +94,42 @@ def check_answers():
     if (request.method == 'POST'):
         data = request.get_json()
         try:
+
             dict_of_answers = data['answers']
             username = data['username']
             block_id = data['id_block']
+
         except KeyError:
+
             output_data = jsonify({'ERROR':'ID doesnt exist'})
             return output_data
+
         b = Block.query.get(int(block_id))
+        if (len(b.users.filter_by(username=username).all())>0):
+            output_data = {'ERROR':'user has already passed the block'}
+            return jsonify(output_data)
+
+        user = User.query.filter_by(username=username).first()
         output_data = {'result':{},'block_id':block_id}
         for i in range(1,int(dict_of_answers['count'])+1):
+
             current_answers = dict_of_answers[str(i)]
             question = current_answers['text']
             user_answer = current_answers['user_answer']
             question = b.questions.filter_by(text=question).first()
             bd_correct_answer = question.get_Correct_Answer_int()
             bd_correct_answers = question.get_Answers()
+
             if (bd_correct_answer==int(user_answer)):
                 output_data['result'].update({i:{'status':'correct'}})
+                user.score+=1
+
             else:
                 output_data['result'].update({i:{'status':'mistake','correct_answer':question.get_Answer_str(bd_correct_answer),'user_answer':question.get_Answer_str(user_answer)}})
+        b.users.append(user)
+        db.session.add(user)
+        db.session.add(b)
+        db.session.commit()
         return jsonify(output_data)
 
 

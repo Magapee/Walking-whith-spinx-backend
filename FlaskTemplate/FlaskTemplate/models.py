@@ -14,6 +14,10 @@ class User(db.Model):
     password_hash = db.Column(db.String)
     score = db.Column(db.Integer,default=0)
     email = db.Column(db.String,unique=True)
+    blocks = db.Column(db.Integer,db.ForeignKey('block.id'))
+
+
+
     def ser(self):
         return jsonify({'id':self.id,'username':self.username,'email':self.email,
                         'password_hash':self.password_hash})
@@ -43,20 +47,28 @@ class Answers(db.Model):
     answer6 = db.Column(db.String,default="null")
     correct_answer = db.Column(db.Integer,default=-1)
     question_id = db.Column(db.Integer,db.ForeignKey('question.id'),nullable=False)
+
+
     def get_Correct_Answer(self):
         return self.correct_answer
+
+
     def get_Answers(self):
         output_dict = {'answers':{'answer1':self.answer1,'answer2':self.answer2,'answer3':self.answer3}}
         count_of_questions = 3
+
         if (self.answer4!='null'):
             output_dict['answers'].update({'answer4':self.answer4})
             count_of_questions+=1
+
         if (self.answer5!='null'):
             output_dict['answers'].update({'answer5':self.answer5})
             count_of_questions+=1
+
         if (self.answer6!='null'):
             output_dict['answers'].update({'answer6':self.answer6})
             count_of_questions+=1
+
         output_dict.update({'count_of_answers':count_of_questions,'correct_answer':self.correct_answer})
         return output_dict
 
@@ -67,15 +79,24 @@ class Question(db.Model):
     text = db.Column(db.String,nullable=False)
     answers = db.relationship('Answers',backref='question',uselist=False)
     block_id = db.Column(db.Integer,db.ForeignKey('block.id'),nullable=False)
+
+
     def get_Question(self):
         return {'text':self.text}
+
+
     def get_Answers(self):
         return self.answers.get_Answers()
+
     def get_Correct_Answer_int(self):
         return self.answers.get_Correct_Answer()
+
+
     def get_Answer_str(self,number):
         #correct_answer = self.get_Correct_Answer_int()
         return self.get_Answers()['answers']['answer'+str(number)]
+
+
     def get_All(self):
         output_data = self.get_Question()
         output_data.update(self.get_Answers())
@@ -85,6 +106,7 @@ class Question(db.Model):
 class Block(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     questions = db.relationship('Question',backref='block',lazy='dynamic')
+    users = db.relationship('User',backref='block_users',lazy='dynamic')
 
     def get_Questions(self):
         count_of_questions = 0
