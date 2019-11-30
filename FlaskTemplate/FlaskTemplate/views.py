@@ -4,8 +4,9 @@ Routes and views for the flask application.
 
 from datetime import datetime
 from flask import render_template,jsonify,request
-from FlaskTemplate import app,lm
+from FlaskTemplate import app, lm
 from .models import User,db,Question,Answers,Block
+from flask_login import login_user
 
 
 
@@ -327,3 +328,20 @@ def registration():
     db.session.add(user)
     db.session.commit()
     return jsonify({'result':'1'})
+
+
+@app.route('/api/login', methods = ['POST'])
+def login():
+    data = request.get_json()
+    try:
+        email = data['email']
+        password = data['password']
+    except KeyError:
+        return jsonify({'ERROR':'Wrong data'})
+    
+    user = User.query.filter_by(email=email).first()
+    if user and user.password_hash == password:
+        login_user(user)
+        return jsonify({'result' : '1'})
+    return jsonify({'result' : '1'})
+
