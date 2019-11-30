@@ -238,13 +238,6 @@ def get_tablescore():
 
 
 
-#@app.route('/check')
-#def check():
-#   u = User(username="admin1232",email="admin123")
-#   db.session.add(u)
-#   db.session.commit()
-#   return jsonify({'size':len(User.query.all())})
-
 
 
 #ПОЛУЧИТЬ СПИСОК АКТИВНЫХ БЛОКОВ(для главного меню)
@@ -278,6 +271,8 @@ def get_active_blocks():
             output_data['blocks'].update({block.id:status})
         return jsonify(output_data)
 
+
+
 #ПОЛУЧИТЬ ПОЛЬЗОВАТЕЛЬСКУЮ ИНФОРМАЦИЮ
 @app.route('/api/get_user_info',methods=['POST'])
 def get_user_info():
@@ -300,9 +295,14 @@ def get_user_info():
             output_data = {'ERROR':'User doesnt exist'}
         return jsonify(output_data)
 
+
+
 @lm.user_loader
 def load_user(user_id):
     return User.query.filter_by(id=user_id).first()
+
+
+
 
 #def get_Active_blocks(username):
 #    b = Block.query.all()

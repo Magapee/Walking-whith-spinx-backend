@@ -37,6 +37,8 @@ class User(db.Model):
     
     #type_of_question = db.Column(db.Integer)
 
+
+
 class Answers(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     answer1 = db.Column(db.String)
