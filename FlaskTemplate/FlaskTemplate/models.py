@@ -14,9 +14,22 @@ class User(db.Model):
     password_hash = db.Column(db.String)
     score = db.Column(db.Integer,default=0)
     email = db.Column(db.String,unique=True)
+
     def ser(self):
         return jsonify({'id':self.id,'username':self.username,'email':self.email,
                         'password_hash':self.password_hash})
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
 
 
 #class Achievements(db.Model):

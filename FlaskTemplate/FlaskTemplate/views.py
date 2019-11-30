@@ -4,7 +4,7 @@ Routes and views for the flask application.
 
 from datetime import datetime
 from flask import render_template,jsonify,request
-from FlaskTemplate import app,lm
+from FlaskTemplate import app,loginManager
 from .models import User,db,Question,Answers
 
 
@@ -17,6 +17,12 @@ def home():
         title='Home Page',
         year=datetime.now().year,
     )
+
+
+@app.route('/api/register', method = ['POST'])
+def registration():
+    pass
+
 
 @app.route('/contact')
 def contact():
@@ -49,6 +55,8 @@ def create_question():
         db.session.add(q)
         db.session.commit()
         return jsonify(data)
+
+
 @app.route('/api/get_question',methods=['POST'])
 def get_question():
     if(request.method=='POST'):
@@ -76,7 +84,16 @@ def check():
    db.session.add(u)
    db.session.commit()
    return jsonify({'size':len(User.query.all())})
-@lm.user_loader
+
+
+@loginManager.user_loader
 def load_user(user_id):
     return User.query.filter_by(id=user_id).first()
+
+
+@app.route('/is_alive', methods = ['POST'])
+def alive():
+    resp = app.make_response(jsonify({"value" : "There should be a cookie"}))
+    resp.set_cookie("testing", 'testing')
+    return resp
 

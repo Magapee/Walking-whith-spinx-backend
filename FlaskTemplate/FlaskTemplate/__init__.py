@@ -7,8 +7,8 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 
 app = Flask(__name__)
-lm = LoginManager()
-lm.init_app(app)
+loginManager = LoginManager()
+loginManager.init_app(app)
 
 
 
