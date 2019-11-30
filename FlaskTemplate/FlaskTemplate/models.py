@@ -6,7 +6,13 @@ from flask_migrate import Migrate
 
 app.config.from_object(Config)
 db = SQLAlchemy(app)
-#migrate = Migrate(app,db)
+migrate = Migrate(app,db)
+
+
+assosication_table = db.Table('association',db.Model.metadata,
+                              db.Column('user_id',db.Integer,db.ForeignKey('user.id')),
+                                        db.Column('block_id',db.Integer,db.ForeignKey('block.id'))
+                                        )
 
 class User(db.Model):
     id = db.Column(db.Integer,primary_key=True)
@@ -14,13 +20,15 @@ class User(db.Model):
     password_hash = db.Column(db.String)
     score = db.Column(db.Integer,default=0)
     email = db.Column(db.String,unique=True)
-    blocks = db.Column(db.Integer,db.ForeignKey('block.id'))
+    blocks = db.relationship('Block',backref='user_blocks',secondary=assosication_table,lazy='dynamic')
+    #blocks = db.Column(db.Integer,db.ForeignKey('block.id'))
 
 
 
     def ser(self):
         return jsonify({'id':self.id,'username':self.username,'email':self.email,
                         'password_hash':self.password_hash})
+
 
 
 #class Achievements(db.Model):
@@ -108,7 +116,7 @@ class Question(db.Model):
 class Block(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     questions = db.relationship('Question',backref='block',lazy='dynamic')
-    users = db.relationship('User',backref='block_users',lazy='dynamic')
+    users = db.relationship('User',backref='block_users',secondary=assosication_table,lazy='dynamic')
 
     def get_Questions(self):
         count_of_questions = 0
@@ -118,7 +126,6 @@ class Block(db.Model):
             output_data['questions'].update({str(count_of_questions):question.get_All()})
         output_data.update({'count':count_of_questions})
         return output_data
-
 
 
 db.create_all()

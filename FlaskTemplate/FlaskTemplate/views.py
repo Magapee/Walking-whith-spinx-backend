@@ -196,6 +196,7 @@ def check_answers():
             else:
                 output_data['result'].update({i:{'status':'mistake','correct_answer':question.get_Answer_str(bd_correct_answer),'user_answer':question.get_Answer_str(user_answer)}})
         b.users.append(user)
+        user.blocks.append(b)
         db.session.add(user)
         db.session.add(b)
         db.session.commit()
