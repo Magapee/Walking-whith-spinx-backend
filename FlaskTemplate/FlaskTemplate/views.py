@@ -181,9 +181,39 @@ def get_active_blocks():
             output_data['blocks'].update({block.id:status})
         return jsonify(output_data)
 
-
+#ПОЛУЧИТЬ ПОЛЬЗОВАТЕЛЬСКУЮ ИНФОРМАЦИЮ
+@app.route('/api/get_user_info',methods=['POST'])
+def get_user_info():
+    if request.method == 'POST':
+        data = request.get_json()
+        try:
+            username = data['username']
+        except KeyError:
+            output_data = {'ERROR':'Username doesnt exist'}
+            return jsonify(output_data)
+        u = User.query.filter_by(username=username).all()
+        if (len(u)>0):
+            u = u[0]
+            output_data = {'username':u.username,'score':u.score,'active_blocks':{}}
+            b = Block.query.all()
+            for block in b:
+                if (block.users.filter_by(username=username).first() is not None):
+                    output_data['active_blocks'].update({block.id:'1'})
+        return jsonify(output_data)
 
 @lm.user_loader
 def load_user(user_id):
     return User.query.filter_by(id=user_id).first()
+
+#def get_Active_blocks(username):
+#    b = Block.query.all()
+#    output_data = {'blocks':{}}
+#    for block in b:
+#        if (block.users.filter_by(username=username).first() is not None):
+#            status = 1
+#        else:
+#            status = 0
+#        output_data['blocks'].update({block.id:status})
+#    return output_data
+
 
