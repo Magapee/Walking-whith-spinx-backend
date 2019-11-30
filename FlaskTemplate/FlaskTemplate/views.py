@@ -83,10 +83,14 @@ def get_question():
 #   db.session.commit()
 #   return jsonify({'size':len(User.query.all())})
 
+
+
 #ЛОГИН?????
 @lm.user_loader
 def load_user(user_id):
     return User.query.filter_by(id=user_id).first()
+
+
 
 #ПРОВЕРКА ПОЛУЧЕННЫХ ОТВЕТОВ
 @app.route('/api/check_answers',methods=['POST'])
@@ -154,6 +158,29 @@ def get_tablescore():
 #   db.session.add(u)
 #   db.session.commit()
 #   return jsonify({'size':len(User.query.all())})
+
+
+
+#ПОЛУЧИТЬ СПИСОК АКТИВНЫХ БЛОКОВ(для главного меню)
+@app.route('/api/get_active_blocks',methods=['POST'])
+def get_active_blocks():
+    if request.method=='POST':
+        data = request.get_json()
+        try:
+            username = data['username']
+        except KeyError:
+            output_data = {'ERROR':'ID doesnt exist'}
+            return jsonify(output_data)
+        b = Block.query.all()
+        output_data = {'blocks':{}}
+        for block in b:
+            if (block.users.filter_by(username=username).first() is not None):
+                status = 1
+            else:
+                status = 0
+            output_data['blocks'].update({block.id:status})
+        return jsonify(output_data)
+
 
 
 @lm.user_loader
