@@ -92,7 +92,7 @@ class Question(db.Model):
 
 
     def get_Question(self):
-        return {'text':self.text}
+        return {'text':self.text,'id_question':self.id}
 
 
     def get_Answers(self):

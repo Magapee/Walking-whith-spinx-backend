@@ -184,8 +184,9 @@ def check_answers():
 
             current_answers = dict_of_answers[str(i)]
             question = current_answers['text']
+            question_id = int(current_answers['id_question'])
             user_answer = current_answers['user_answer']
-            question = b.questions.filter_by(text=question).first()
+            question = b.questions.filter_by(id=question_id).first()
             bd_correct_answer = question.get_Correct_Answer_int()
             bd_correct_answers = question.get_Answers()
 
