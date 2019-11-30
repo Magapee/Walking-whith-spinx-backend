@@ -40,35 +40,6 @@ def get_block_info():
             return output_data
 
 
-@app.route('/')
-@app.route('/home')
-def home():
-    """Renders the home page."""
-    return render_template(
-        'index.html',
-        title='Home Page',
-        year=datetime.now().year,
-    )
-
-@app.route('/contact')
-def contact():
-    """Renders the contact page."""
-    return render_template(
-        'contact.html',
-        title='Contact',
-        year=datetime.now().year,
-        message='Your contact page.'
-    )
-
-@app.route('/about')
-def about():
-    """Renders the about page."""
-    return render_template(
-        'about.html',
-        title='About',
-        year=datetime.now().year,
-        message='Your application description page.'
-    )
 
 @app.route('/api/create_question',methods=['POST'])
 def create_question():
@@ -133,12 +104,15 @@ def get_tablescore():
     output_data.update({'count_of_users':count_of_users})
     return jsonify(output_data)
 
+
 @app.route('/check')
 def check():
    u = User(username="admin1232",email="admin123")
    db.session.add(u)
    db.session.commit()
    return jsonify({'size':len(User.query.all())})
+
+
 @lm.user_loader
 def load_user(user_id):
     return User.query.filter_by(id=user_id).first()

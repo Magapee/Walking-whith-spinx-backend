@@ -62,10 +62,24 @@ class Question(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     text = db.Column(db.String,nullable=False)
     answers = db.relationship('Answers',backref='question',uselist=False)
+    block_id = db.Column(db.Integer,db.ForeignKey('block.id'),nullable=False)
     def get_Question(self):
-        return {'id_question':self.id,'text':self.text}
+        return {'text':self.text}
     def get_Answers(self):
         return self.answers.get_Answers()
+    def get_All(self):
+        output_data = self.get_Question()
+        output_data.update(self.get_Answers())
+        return output_data
 
+
+class Block(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    questions = db.relationship('Question',backref='block',lazy='dynamic')
+
+    def get_Questions(self):
+        for question in Question.query.filter_by(block_id=self.id):
+            #print(1)
+            return question.get_All()
 
 db.create_all()
