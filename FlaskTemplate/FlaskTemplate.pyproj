@@ -29,9 +29,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="config.py">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="FlaskTemplate\config.py" />
     <Compile Include="FlaskTemplate\models.py">
       <SubType>Code</SubType>
     </Compile>

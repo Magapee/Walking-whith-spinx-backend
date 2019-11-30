@@ -1,17 +1,15 @@
 """
 The flask application package.
 """
-
+from flask_sqlalchemy import SQLAlchemy 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from config import DevelopmentConfig, BaseConfig
-
+from flask_login import LoginManager
 
 app = Flask(__name__)
-app.config.from_object(DevelopmentConfig)
-main_db = SQLAlchemy(app)
-migrate = Migrate(app, main_db)
+lm = LoginManager()
+lm.init_app(app)
 
-from FlaskTemplate import views
-from FlaskTemplate import models
+
+
+import FlaskTemplate.views
