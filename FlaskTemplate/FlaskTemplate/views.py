@@ -343,5 +343,5 @@ def login():
     if user and user.password_hash == password:
         login_user(user)
         return jsonify({'result' : '1'})
-    return jsonify({'result' : '1'})
+    return jsonify({'result' : '0'})
 
