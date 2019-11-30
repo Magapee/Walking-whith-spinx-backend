@@ -22,6 +22,39 @@ from .models import User,db,Question,Answers,Block
 #        return jsonify(data)
 
 #ПОЛУЧИТЬ ВОПРОСЫ И ИНФУ БЛОКА
+#ПОЛУЧАЮ
+#{
+#	"id_block":"1"
+#}
+#ОТПРАВЛЯЮ
+#{
+#  "count": 2, // количество вопросов
+#  "questions": {
+#    "1": { // номер вопроса
+#      "answers": {
+#        "answer1": "1",
+#        "answer2": "2", //варианты ответов
+#        "answer3": "3",
+#        "answer4": "4"
+#      },
+#      "correct_answer": 2, // правильный ответ
+#      "count_of_answers": 4, // количество ответов
+#      "text": "1" // сам вопрос
+#    },
+#    "2": {
+#      "answers": {
+#        "answer1": "1_2",
+#        "answer2": "2_2",
+#        "answer3": "3_2",
+#        "answer4": "4_2"
+#      },
+#      "correct_answer": 4,
+#      "count_of_answers": 4,
+#      "text": "2"
+#    }
+#  }
+#}
+
 @app.route('/api/get_block_info',methods=['POST'])
 def get_block_info():
     if (request.method=='POST'):
@@ -93,6 +126,38 @@ def load_user(user_id):
 
 
 #ПРОВЕРКА ПОЛУЧЕННЫХ ОТВЕТОВ
+#ПРОВЕРКА РЕЗУЛЬТАТОВ
+#ПОЛУЧАЮ
+#{
+#	"id_block":"2", // айди блока
+#	"username":"admin", // имя пользователя
+#	"answers":{
+#		"1":{//номер вопроса
+#			"text":"1", //текст вопроса
+#			"user_answer":"2" //ответ пользователя (номер ответа)
+#		},
+#		"2":{
+#			"text":"2",
+#			"user_answer":"3"
+#		},
+#		"count":"2" //количество вопросов для проверки
+#	}
+#}
+
+#ОТПРАВЛЯЮ
+#{
+#  "block_id": "2", //айди блока
+#  "result": {
+#    "1": {
+#      "status": "correct" //статус
+#    },
+#    "2": {
+#      "correct_answer": "4_2", //правильный ответ (текст ответа)
+#      "status": "mistake",
+#      "user_answer": "3_2" //ответ пользователя (текст ответа)
+#    }
+#  }
+#}
 @app.route('/api/check_answers',methods=['POST'])
 def check_answers():
     if (request.method == 'POST'):
@@ -140,6 +205,26 @@ def check_answers():
 
 
 #ВЫВОД ТАБЛИЦ ЛИДЕРОВ
+#ПОЛУЧАЮ
+#ничего get/post
+#ОТПРАВЛЯЮ
+#{
+#  "count_of_users": 3, // количество пользователя
+#  "users": {
+#    "1": {
+#      "score": 100, // баллы
+#      "username": "admin" // имя пользователя
+#    },
+#    "2": {
+#      "score": 80,
+#      "username": "dsadsadas"
+#    },
+#    "3": {
+#      "score": 10,
+#      "username": "2312"
+#    }
+#  }
+#}
 @app.route('/api/tablescore',methods=['GET','POST'])
 def get_tablescore():
     q = User.query.order_by(User.score.desc())
@@ -152,6 +237,7 @@ def get_tablescore():
     return jsonify(output_data)
 
 
+
 #@app.route('/check')
 #def check():
 #   u = User(username="admin1232",email="admin123")
@@ -162,6 +248,17 @@ def get_tablescore():
 
 
 #ПОЛУЧИТЬ СПИСОК АКТИВНЫХ БЛОКОВ(для главного меню)
+#ПОЛУЧАЮ
+#{
+#	"username":"test" // имя пользователя
+#}
+#ОТПРАВЛЯЮ
+#{
+#  "blocks": {
+#    "1": 1, //блок активен
+#    "2": 0 //блок неактивен
+#  }
+#}
 @app.route('/api/get_active_blocks',methods=['POST'])
 def get_active_blocks():
     if request.method=='POST':
