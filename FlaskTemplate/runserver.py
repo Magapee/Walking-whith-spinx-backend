@@ -19,4 +19,4 @@ if __name__ == '__main__':
     except ValueError:
         PORT = 80
     PORT = 80
-    app.run('0.0.0.0', PORT)
+    app.run('localhost', PORT)
