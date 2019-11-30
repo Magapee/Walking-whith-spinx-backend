@@ -194,7 +194,7 @@ def get_user_info():
         u = User.query.filter_by(username=username).all()
         if (len(u)>0):
             u = u[0]
-            output_data = {'username':u.username,'score':u.score,'active_blocks':{}}
+            output_data = {'username':u.username,'score':u.score,'email':u.email,'active_blocks':{}}
             b = Block.query.all()
             for block in b:
                 if (block.users.filter_by(username=username).first() is not None):
