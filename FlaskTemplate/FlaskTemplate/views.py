@@ -199,6 +199,8 @@ def get_user_info():
             for block in b:
                 if (block.users.filter_by(username=username).first() is not None):
                     output_data['active_blocks'].update({block.id:'1'})
+        else:
+            output_data = {'ERROR':'User doesnt exist'}
         return jsonify(output_data)
 
 @lm.user_loader
