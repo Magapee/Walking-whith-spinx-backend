@@ -43,6 +43,8 @@ class Answers(db.Model):
     answer6 = db.Column(db.String,default="null")
     correct_answer = db.Column(db.Integer,default=-1)
     question_id = db.Column(db.Integer,db.ForeignKey('question.id'),nullable=False)
+    def get_Correct_Answer(self):
+        return self.correct_answer
     def get_Answers(self):
         output_dict = {'answers':{'answer1':self.answer1,'answer2':self.answer2,'answer3':self.answer3}}
         count_of_questions = 3
@@ -58,6 +60,8 @@ class Answers(db.Model):
         output_dict.update({'count_of_answers':count_of_questions,'correct_answer':self.correct_answer})
         return output_dict
 
+
+
 class Question(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     text = db.Column(db.String,nullable=False)
@@ -67,6 +71,11 @@ class Question(db.Model):
         return {'text':self.text}
     def get_Answers(self):
         return self.answers.get_Answers()
+    def get_Correct_Answer_int(self):
+        return self.answers.get_Correct_Answer()
+    def get_Answer_str(self,number):
+        #correct_answer = self.get_Correct_Answer_int()
+        return self.get_Answers()['answers']['answer'+str(number)]
     def get_All(self):
         output_data = self.get_Question()
         output_data.update(self.get_Answers())
@@ -79,10 +88,10 @@ class Block(db.Model):
 
     def get_Questions(self):
         count_of_questions = 0
-        output_data = {}
+        output_data = {'questions':{}}
         for question in Question.query.filter_by(block_id=self.id):
             count_of_questions+=1
-            output_data.update({str(count_of_questions):question.get_All()})
+            output_data['questions'].update({str(count_of_questions):question.get_All()})
         output_data.update({'count':count_of_questions})
         return output_data
 
