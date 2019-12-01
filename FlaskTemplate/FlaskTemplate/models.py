@@ -125,7 +125,7 @@ class Question(db.Model):
 
 
     def get_Question(self):
-        return {'text':self.text,'id_question':self.id}
+        return {'text':self.text}
 
 
     def get_Answers(self):
@@ -157,7 +157,7 @@ class Block(db.Model):
         output_data = {'questions':{}}
         for question in Question.query.filter_by(block_id=self.id):
             count_of_questions+=1
-            output_data['questions'].update({str(count_of_questions):question.get_All()})
+            output_data['questions'].update({question.id:question.get_All()})
         output_data.update({'count':count_of_questions})
         return output_data
 
