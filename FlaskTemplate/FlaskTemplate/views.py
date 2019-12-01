@@ -55,7 +55,7 @@ def get_block_info():
         except KeyError: 
             output_data = jsonify({'status':'0','desc':'ID in POST doesnt exist'})
             return output_data
-        block = Block.query.get(id_block)
+        block = Block.query.filter_by(block_type=id_block).first()
         if block is not None:
             output_data = block.get_Questions()
             output_data.update({'status':'1'})
