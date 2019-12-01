@@ -397,3 +397,7 @@ def logout():
     logout_user()
     return jsonify({'result' : '1'})
 
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return jsonify({'result' : '0'})
