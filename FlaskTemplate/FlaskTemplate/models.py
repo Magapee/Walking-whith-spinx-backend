@@ -1,4 +1,5 @@
 from FlaskTemplate import app, lm
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy 
 from .config import BaseConfig as Config
 from flask import jsonify
@@ -41,6 +42,13 @@ class User(db.Model):
 
     def get_id(self):
         return self.id
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
     #blocks = db.Column(db.Integer,db.ForeignKey('block.id'))
 
     

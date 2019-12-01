@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import render_template,jsonify,request
 from FlaskTemplate import app, lm
 from .models import User,db,Question,Answers,Block
-from flask_login import login_user
+from flask_login import login_user, logout_user, current_user, login_required
 
 
 
@@ -154,6 +154,7 @@ def get_question():
 #    }
 #  }
 #}
+@login_required
 @app.route('/api/check_answers', methods=['POST'])
 def check_answers():
     if (request.method == 'POST'):
@@ -161,7 +162,7 @@ def check_answers():
         try:
 
             dict_of_answers = data['answers']
-            username = data['username']
+            username = current_user.username
             block_id = data['id_block']
 
         except KeyError:
@@ -223,6 +224,7 @@ def check_answers():
 #    }
 #  }
 #}
+@login_required
 @app.route('/api/tablescore',methods=['GET','POST'])
 def get_tablescore():
     q = User.query.order_by(User.score.desc())
@@ -250,15 +252,12 @@ def get_tablescore():
 #    "2": 0 //блок неактивен
 #  }
 #}
+@login_required
 @app.route('/api/get_active_blocks',methods=['POST'])
 def get_active_blocks():
     if request.method=='POST':
         data = request.get_json()
-        try:
-            username = data['username']
-        except KeyError:
-            output_data = {'ERROR':'ID doesnt exist'}
-            return jsonify(output_data)
+        username = current_user.username
         b = Block.query.all()
         output_data = {'blocks':{}}
         for block in b:
@@ -272,15 +271,12 @@ def get_active_blocks():
 
 
 #ПОЛУЧИТЬ ПОЛЬЗОВАТЕЛЬСКУЮ ИНФОРМАЦИЮ
+@login_required
 @app.route('/api/get_user_info',methods=['POST'])
 def get_user_info():
     if request.method == 'POST':
         data = request.get_json()
-        try:
-            username = data['username']
-        except KeyError:
-            output_data = {'ERROR':'Username doesnt exist'}
-            return jsonify(output_data)
+        username = current_user.username
         u = User.query.filter_by(username=username).all()
         if (len(u)>0):
             u = u[0]
@@ -324,7 +320,8 @@ def registration():
     if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None:
         return jsonify({'result':'0'})
     
-    user = User(username=username, email=email, password_hash=password)
+    user = User(username=username, email=email)
+    user.set_password(password)
     db.session.add(user)
     db.session.commit()
     return jsonify({'result':'1'})
@@ -340,8 +337,14 @@ def login():
         return jsonify({'ERROR':'Wrong data'})
     
     user = User.query.filter_by(email=email).first()
-    if user and user.password_hash == password:
+    if user and user.check_password(password):
         login_user(user)
         return jsonify({'result' : '1'})
     return jsonify({'result' : '0'})
+
+@login_required
+@app.route('/api/logout', methods = ['POST'])
+def logout():
+    logout_user()
+    return jsonify({'result' : '1'})
 
