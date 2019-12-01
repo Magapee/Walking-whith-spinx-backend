@@ -8,7 +8,7 @@ import random,re
 from flask_mail import Message
 from .models import User,db,Question,Answers,Block,mail
 from FlaskTemplate import app, lm
-from flask_login import login_user, logout_user, current_user, login_required\
+from flask_login import login_user, logout_user, current_user, login_required
 
 
 
@@ -320,7 +320,7 @@ def send_email(app,email):
         return random_code
 
 
-@app.route('/api/check_email',methods=['POST'])
+@app.route('/api/check_code_email',methods=['POST'])
 def check_email():
     data =request.get_json()
     try:
@@ -415,6 +415,46 @@ def login():
 def logout():
     logout_user()
     return jsonify({'status' : '1'})
+
+
+@app.route('/api/reset_password',methods = ['POST'])
+def reset_password():
+    data = request.get_json()
+    try:
+        email = data['email']
+    except KeyError:
+        output_data = {'status':0,'desc':'not found email'}
+        return jsonify(output_data)
+    query = User.query.filter_by(email = email).first()
+    if query is not None:
+        send_email(app,email)
+        output_data = {'status':1}
+        return jsonify(output_data)
+    else:
+        output_data = {'status':0,'desc':'not found email in db'}
+        return jsonify(output_data)
+
+@app.route('/api/check_code_password')
+def check_code_password():
+    data = request.get_json()
+    try:
+        code = data['code']
+        email = data['email']
+        password = data['password']
+    except KeyError:
+        output_data = {'status':0,'desc':'not found code'}
+        return jsonify(output_data)
+    query = User.query.filter_by(email = email).first()
+    if query is not None:
+        if (query.random_code == int(code)):
+            query.set_password(password)
+            output_data = {'status':1}
+        else:
+            output_data = {'status':0,'desc':'incorrect_code'}
+        return jsonify(output_data)
+    else:
+        output_data = {'status':0,'desc':'not found email in db'}
+        return jsonify(output_data)
 
 
 @lm.unauthorized_handler
