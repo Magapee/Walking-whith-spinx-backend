@@ -4,7 +4,7 @@ Routes and views for the flask application.
 
 from datetime import datetime
 from flask import render_template,jsonify,request
-import random
+import random,re
 from flask_mail import Message
 from .models import User,db,Question,Answers,Block,mail
 from FlaskTemplate import app, lm
@@ -65,14 +65,15 @@ def get_block_info():
         try:
             id_block = data['id_block']
         except KeyError: 
-            output_data = jsonify({'ERROR':'ID in POST doesnt exist'})
+            output_data = jsonify({'status':0,'desc':'ID in POST doesnt exist'})
             return output_data
         block = Block.query.get(id_block)
         if block is not None:
             output_data = block.get_Questions()
+            output_data.update({'status':1})
             return jsonify(output_data)
         else:
-            output_data = jsonify({'ERROR':'Block doesnt exist'})
+            output_data = jsonify({'status':0,'desc':'Block doesnt exist'})
             return output_data
 
 
@@ -98,15 +99,16 @@ def get_question():
         try:
             id_question = data['id_question']
         except KeyError:
-            output_data = jsonify({'ERROR':'ID doesnt exist'})
+            output_data = jsonify({'status':0,'desc':'ID doesnt exist'})
             return output_data
         question = Question.query.get(id_question)
         if question is not None:
             output_data = question.get_Question()
             output_data.update(question.get_Answers())
+            output_data.update({'status':1})
             output_data = jsonify(output_data)
         else:
-            output_data = jsonify({'ERROR':'Question doesnt exist'})
+            output_data = jsonify({'status':0,'desc':'Question doesnt exist'})
         return output_data
 
 #@app.route('/login_check')
@@ -170,12 +172,12 @@ def check_answers():
 
         except KeyError:
 
-            output_data = jsonify({'ERROR':'ID doesnt exist'})
+            output_data = jsonify({'status':0,'desc':'ID doesnt exist'})
             return output_data
 
         b = Block.query.get(int(block_id))
         if (len(b.users.filter_by(username=username).all())>0):
-            output_data = {'ERROR':'user has already passed the block'}
+            output_data = {'status':0,'desc':'user has already passed the block'}
             return jsonify(output_data)
 
         user = User.query.filter_by(username=username).first()
@@ -191,11 +193,12 @@ def check_answers():
             bd_correct_answers = question.get_Answers()
 
             if (bd_correct_answer==int(user_answer)):
-                output_data['result'].update({i:{'status':'correct'}})
+                output_data['result'].update({i:{'status':1}})
                 user.score+=1
 
             else:
-                output_data['result'].update({i:{'status':'mistake','correct_answer':question.get_Answer_str(bd_correct_answer),'user_answer':question.get_Answer_str(user_answer)}})
+                output_data['result'].update({i:{'status':0,'correct_answer':question.get_Answer_str(bd_correct_answer),'user_answer':question.get_Answer_str(user_answer)}})
+        output_data.update({'status':1})
         b.users.append(user)
         user.blocks.append(b)
         db.session.add(user)
@@ -237,6 +240,7 @@ def get_tablescore():
     for user in q.all():
         count_of_users += 1
         output_data['users'].update({count_of_users:{'score':user.score,'username':user.username}})
+    output_data.update({'status':1})
     output_data.update({'count_of_users':count_of_users})
     return jsonify(output_data)
 
@@ -271,6 +275,7 @@ def get_active_blocks():
             else:
                 status = 0
             output_data['blocks'].update({block.id:status})
+        output_data.update({'status':1})
         return jsonify(output_data)
 
 
@@ -292,8 +297,9 @@ def get_user_info():
             for block in b:
                 if (block.users.filter_by(username=username).first() is not None):
                     output_data['active_blocks'].update({block.id:'1'})
+            output_data.update({'status':1})
         else:
-            output_data = {'ERROR':'User doesnt exist'}
+            output_data = {'status':0,'desc':'User doesnt exist'}
         return jsonify(output_data)
 
 
@@ -321,7 +327,7 @@ def check_email():
         email = data['email']
         code = data['code']
     except KeyError:
-        output_data = {'ERROR':'EMAIL doesnt exist'}
+        output_data = {'status':0,'desc':'EMAIL doesnt exist'}
         return jsonify(output_data)
     u = User.query.filter_by(email = email).first()
     if u is not None:
@@ -342,7 +348,7 @@ def send_confirmation():
     try:
         email = data['email']
     except KeyError:
-        output_data = {'ERROR':'EMAIL doesnt exist'}
+        output_data = {'status':0,'desc':'EMAIL doesnt exist'}
         return jsonify(output_data)
     send_email(app,email)
     return jsonify({'status':1})
@@ -363,22 +369,23 @@ def send_confirmation():
 #Registration
 @app.route('/api/registration', methods = ['POST'])
 def registration():
+    regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     data = request.get_json()
     try:
         username = data['login']
         email = data['email']
         password = data['password']
     except KeyError:
-        return jsonify({'ERROR':'Wrong data'})
+        return jsonify({'status':0})
     
-    if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None:
-        return jsonify({'result':'0'})
+    if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None or re.search(regex,email) is None or email.isalnum() is False or username.isalnum() is False:
+        return jsonify({'status':0})
     
     user = User(username=username, email=email)
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
-    return jsonify({'result':'1'})
+    return jsonify({'status':1})
 
 
 @app.route('/api/login', methods = ['POST'])
@@ -388,28 +395,28 @@ def login():
         email = data['email']
         password = data['password']
     except KeyError:
-        return jsonify({'ERROR':'Wrong data'})
+        return jsonify({'status':0,'desc':'Wrong data'})
     
     user = User.query.filter_by(email=email).first() #проверка по емейлу
     if user and user.check_password(password) :
         login_user(user)
-        return jsonify({'result' : '1'})
+        return jsonify({'status' : '1'})
     
     user = User.query.filter_by(username=email).first() #проверка по логину
     if user and user.check_password(password) :
         login_user(user)
-        return jsonify({'result' : '1'})
+        return jsonify({'status' : 1})
 
-    return jsonify({'result' : '0'})
+    return jsonify({'status' : -1,'desc':'wrong username'})
 
 
 @app.route('/api/logout', methods = ['POST'])
 @login_required
 def logout():
     logout_user()
-    return jsonify({'result' : '1'})
+    return jsonify({'status' : '1'})
 
 
 @lm.unauthorized_handler
 def unauthorized():
-    return jsonify({'auth' : '0'})
+    return jsonify({'auth' : 0,'status':0,'desc':'unauthorized'})
