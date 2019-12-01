@@ -4,10 +4,16 @@ Routes and views for the flask application.
 
 from datetime import datetime
 from flask import render_template,jsonify,request
+<<<<<<< HEAD
 from FlaskTemplate import app,lm
 import random
 from flask_mail import Message
 from .models import User,db,Question,Answers,Block,mail
+=======
+from FlaskTemplate import app, lm
+from .models import User,db,Question,Answers,Block
+from flask_login import login_user, logout_user, current_user, login_required
+>>>>>>> registration
 
 
 
@@ -120,11 +126,6 @@ def get_question():
 
 
 
-#ЛОГИН?????
-@lm.user_loader
-def load_user(user_id):
-    return User.query.filter_by(id=user_id).first()
-
 
 
 #ПРОВЕРКА ПОЛУЧЕННЫХ ОТВЕТОВ
@@ -160,14 +161,15 @@ def load_user(user_id):
 #    }
 #  }
 #}
-@app.route('/api/check_answers',methods=['POST'])
+@login_required
+@app.route('/api/check_answers', methods=['POST'])
 def check_answers():
     if (request.method == 'POST'):
         data = request.get_json()
         try:
 
             dict_of_answers = data['answers']
-            username = data['username']
+            username = current_user.username
             block_id = data['id_block']
 
         except KeyError:
@@ -229,6 +231,7 @@ def check_answers():
 #    }
 #  }
 #}
+@login_required
 @app.route('/api/tablescore',methods=['GET','POST'])
 def get_tablescore():
     q = User.query.order_by(User.score.desc())
@@ -256,15 +259,12 @@ def get_tablescore():
 #    "2": 0 //блок неактивен
 #  }
 #}
+@login_required
 @app.route('/api/get_active_blocks',methods=['POST'])
 def get_active_blocks():
     if request.method=='POST':
         data = request.get_json()
-        try:
-            username = data['username']
-        except KeyError:
-            output_data = {'ERROR':'ID doesnt exist'}
-            return jsonify(output_data)
+        username = current_user.username
         b = Block.query.all()
         output_data = {'blocks':{}}
         for block in b:
@@ -278,15 +278,12 @@ def get_active_blocks():
 
 
 #ПОЛУЧИТЬ ПОЛЬЗОВАТЕЛЬСКУЮ ИНФОРМАЦИЮ
+@login_required
 @app.route('/api/get_user_info',methods=['POST'])
 def get_user_info():
     if request.method == 'POST':
         data = request.get_json()
-        try:
-            username = data['username']
-        except KeyError:
-            output_data = {'ERROR':'Username doesnt exist'}
-            return jsonify(output_data)
+        username = current_user.username
         u = User.query.filter_by(username=username).all()
         if (len(u)>0):
             u = u[0]
@@ -301,6 +298,7 @@ def get_user_info():
 
 
 
+<<<<<<< HEAD
 def send_email(app,email):
     with app.app_context():
         u = User.query.filter_by(email=email).first()
@@ -338,6 +336,8 @@ def check_email():
         return jsonify(output_data)
 
 
+=======
+>>>>>>> registration
 
 @app.route('/api/send_confirmation_email',methods=['POST'])
 def send_confirmation():
@@ -361,4 +361,47 @@ def send_confirmation():
 #        output_data['blocks'].update({block.id:status})
 #    return output_data
 
+
+
+#Registration
+@app.route('/api/registration', methods = ['POST'])
+def registration():
+    data = request.get_json()
+    try:
+        username = data['login']
+        email = data['email']
+        password = data['password']
+    except KeyError:
+        return jsonify({'ERROR':'Wrong data'})
+    
+    if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None:
+        return jsonify({'result':'0'})
+    
+    user = User(username=username, email=email)
+    user.set_password(password)
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({'result':'1'})
+
+
+@app.route('/api/login', methods = ['POST'])
+def login():
+    data = request.get_json()
+    try:
+        email = data['email']
+        password = data['password']
+    except KeyError:
+        return jsonify({'ERROR':'Wrong data'})
+    
+    user = User.query.filter_by(email=email).first()
+    if user and user.check_password(password):
+        login_user(user)
+        return jsonify({'result' : '1'})
+    return jsonify({'result' : '0'})
+
+@login_required
+@app.route('/api/logout', methods = ['POST'])
+def logout():
+    logout_user()
+    return jsonify({'result' : '1'})
 

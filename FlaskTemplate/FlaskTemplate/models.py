@@ -1,4 +1,5 @@
-from FlaskTemplate import app
+from FlaskTemplate import app, lm
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy 
 from .config import BaseConfig as Config
 from flask_mail import Mail
@@ -17,6 +18,14 @@ assosication_table = db.Table('association',db.Model.metadata,
                                         db.Column('block_id',db.Integer,db.ForeignKey('block.id'))
                                         )
 
+
+
+#lm callback
+@lm.user_loader
+def load_user(user_id):
+    return User.query.filter_by(id=user_id).first()
+
+
 class User(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     username = db.Column(db.String,unique = True)
@@ -26,9 +35,28 @@ class User(db.Model):
     random_code = db.Column(db.Integer,default=0)
     is_confirmed = db.Column(db.Integer,default=0)
     blocks = db.relationship('Block',backref='user_blocks',secondary=assosication_table,lazy='dynamic')
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
     #blocks = db.Column(db.Integer,db.ForeignKey('block.id'))
 
-
+    
 
     def ser(self):
         return jsonify({'id':self.id,'username':self.username,'email':self.email,
