@@ -4,16 +4,11 @@ Routes and views for the flask application.
 
 from datetime import datetime
 from flask import render_template,jsonify,request
-<<<<<<< HEAD
-from FlaskTemplate import app,lm
 import random
 from flask_mail import Message
 from .models import User,db,Question,Answers,Block,mail
-=======
 from FlaskTemplate import app, lm
-from .models import User,db,Question,Answers,Block
-from flask_login import login_user, logout_user, current_user, login_required
->>>>>>> registration
+from flask_login import login_user, logout_user, current_user, login_required\
 
 
 
@@ -298,7 +293,6 @@ def get_user_info():
 
 
 
-<<<<<<< HEAD
 def send_email(app,email):
     with app.app_context():
         u = User.query.filter_by(email=email).first()
@@ -336,8 +330,6 @@ def check_email():
         return jsonify(output_data)
 
 
-=======
->>>>>>> registration
 
 @app.route('/api/send_confirmation_email',methods=['POST'])
 def send_confirmation():
