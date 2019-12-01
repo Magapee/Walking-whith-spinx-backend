@@ -369,7 +369,7 @@ def send_confirmation():
 #Registration
 @app.route('/api/registration', methods = ['POST'])
 def registration():
-    #regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+    regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     data = request.get_json()
     try:
         username = data['login']
@@ -381,11 +381,11 @@ def registration():
     if username == "" or email == "" or password == "":
         return jsonify({'status':'0'})
 
-    #if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None or re.search(regex,email) is None or email.isalnum() is False or username.isalnum() is False:
-        #return jsonify({'status':'0'})
-
-    if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None:
+    if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None or re.search(regex,email) is None or username.isalnum() is False:
         return jsonify({'status':'0'})
+
+    #if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None:
+        #return jsonify({'status':'0'})
     
     user = User(username=username, email=email)
     user.set_password(password)
