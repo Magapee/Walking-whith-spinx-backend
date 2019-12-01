@@ -5,7 +5,9 @@ Routes and views for the flask application.
 from datetime import datetime
 from flask import render_template,jsonify,request
 from FlaskTemplate import app,lm
-from .models import User,db,Question,Answers,Block
+import random
+from flask_mail import Message
+from .models import User,db,Question,Answers,Block,mail
 
 
 
@@ -288,7 +290,7 @@ def get_user_info():
         u = User.query.filter_by(username=username).all()
         if (len(u)>0):
             u = u[0]
-            output_data = {'username':u.username,'score':u.score,'email':u.email,'active_blocks':{}}
+            output_data = {'username':u.username,'score':u.score,'email':u.email,'active_blocks':{},'is_confirmed':u.is_confirmed}
             b = Block.query.all()
             for block in b:
                 if (block.users.filter_by(username=username).first() is not None):
@@ -299,12 +301,54 @@ def get_user_info():
 
 
 
-@lm.user_loader
-def load_user(user_id):
-    return User.query.filter_by(id=user_id).first()
+def send_email(app,email):
+    with app.app_context():
+        u = User.query.filter_by(email=email).first()
+        if (u is not None):
+            msg = Message('Подтверждение',recipients=[email])
+            random_code = random.randint(100000,999999)
+            msg.body = 'Код:'+ str(random_code)
+            mail.send(msg)
+            u.random_code = random_code
+            db.session.add(u)
+            db.session.commit()
+        else:
+            return None
+        return random_code
+
+
+@app.route('/api/check_email',methods=['POST'])
+def check_email():
+    data =request.get_json()
+    try:
+        email = data['email']
+        code = data['code']
+    except KeyError:
+        output_data = {'ERROR':'EMAIL doesnt exist'}
+        return jsonify(output_data)
+    u = User.query.filter_by(email = email).first()
+    if u is not None:
+        if (code==u.random_code):
+            u.is_confirmed = 1
+            db.session.add(u)
+            db.session.commit()
+            output_data = {'status':1}
+        else:
+            output_data = {'status':0}
+        return jsonify(output_data)
 
 
 
+@app.route('/api/send_confirmation_email',methods=['POST'])
+def send_confirmation():
+    data =request.get_json()
+    try:
+        email = data['email']
+    except KeyError:
+        output_data = {'ERROR':'EMAIL doesnt exist'}
+        return jsonify(output_data)
+    send_email(app,email)
+    return jsonify({'status':1})
 
 #def get_Active_blocks(username):
 #    b = Block.query.all()

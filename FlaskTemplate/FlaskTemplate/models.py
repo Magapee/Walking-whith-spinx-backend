@@ -1,11 +1,14 @@
 from FlaskTemplate import app
 from flask_sqlalchemy import SQLAlchemy 
 from .config import BaseConfig as Config
+from flask_mail import Mail
 from flask import jsonify
 from flask_migrate import Migrate
 
 app.config.from_object(Config)
 db = SQLAlchemy(app)
+mail = Mail(app)
+mail.connect()
 migrate = Migrate(app,db)
 
 
@@ -20,6 +23,8 @@ class User(db.Model):
     password_hash = db.Column(db.String)
     score = db.Column(db.Integer,default=0)
     email = db.Column(db.String,unique=True)
+    random_code = db.Column(db.Integer,default=0)
+    is_confirmed = db.Column(db.Integer,default=0)
     blocks = db.relationship('Block',backref='user_blocks',secondary=assosication_table,lazy='dynamic')
     #blocks = db.Column(db.Integer,db.ForeignKey('block.id'))
 
