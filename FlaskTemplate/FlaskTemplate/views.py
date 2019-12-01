@@ -390,10 +390,16 @@ def login():
     except KeyError:
         return jsonify({'ERROR':'Wrong data'})
     
-    user = User.query.filter_by(email=email).first()
-    if user and user.check_password(password):
+    user = User.query.filter_by(email=email).first() #проверка по емейлу
+    if user and user.check_password(password) :
         login_user(user)
         return jsonify({'result' : '1'})
+    
+    user = User.query.filter_by(username=email).first() #проверка по логину
+    if user and user.check_password(password) :
+        login_user(user)
+        return jsonify({'result' : '1'})
+
     return jsonify({'result' : '0'})
 
 
@@ -406,4 +412,4 @@ def logout():
 
 @lm.unauthorized_handler
 def unauthorized():
-    return jsonify({'result' : '0'})
+    return jsonify({'auth' : '0'})
