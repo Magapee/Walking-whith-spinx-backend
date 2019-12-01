@@ -90,7 +90,7 @@ class Answers(db.Model):
     answer6 = db.Column(db.String,default="null")
     correct_answer = db.Column(db.Integer,default=-1)
     question_id = db.Column(db.Integer,db.ForeignKey('question.id'),nullable=False)
-    
+
 
     def get_Correct_Answer(self):
         return self.correct_answer
@@ -112,7 +112,7 @@ class Answers(db.Model):
             output_dict['answers'].update({'answer6':self.answer6})
             count_of_questions+=1
 
-        output_dict.update({'count_of_answers':count_of_questions,'correct_answer':self.correct_answer})
+        output_dict.update({'count_of_answers':count_of_questions})
         return output_dict
 
 
