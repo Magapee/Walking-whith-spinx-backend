@@ -150,6 +150,7 @@ class Block(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     questions = db.relationship('Question',backref='block',lazy='dynamic')
     users = db.relationship('User',backref='block_users',secondary=assosication_table,lazy='dynamic')
+    type = db.Column(db.Integer)
 
     def get_Questions(self):
         count_of_questions = 0

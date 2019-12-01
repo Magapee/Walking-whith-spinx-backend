@@ -377,10 +377,8 @@ def registration():
         password = data['password']
     except KeyError:
         return jsonify({'status':0})
-    
     if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None or re.search(regex,email) is None or username.isalnum() is False:
         return jsonify({'status':0,'desc':'check'})
-    
     user = User(username=username, email=email)
     user.set_password(password)
     db.session.add(user)
