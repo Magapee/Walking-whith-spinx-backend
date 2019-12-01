@@ -400,7 +400,7 @@ def login():
     user = User.query.filter_by(email=email).first() #проверка по емейлу
     if user and user.check_password(password) :
         login_user(user)
-        return jsonify({'status' : '1'})
+        return jsonify({'status' : 1})
     
     user = User.query.filter_by(username=email).first() #проверка по логину
     if user and user.check_password(password) :
@@ -414,7 +414,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return jsonify({'status' : '1'})
+    return jsonify({'status' : 1})
 
 
 @app.route('/api/reset_password',methods = ['POST'])
