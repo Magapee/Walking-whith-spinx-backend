@@ -413,7 +413,7 @@ def login():
     return jsonify({'status' : -1,'desc':'wrong username'})
 
 
-@app.route('/api/logout', methods = ['POST'])
+@app.route('/api/logout', methods = ['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
