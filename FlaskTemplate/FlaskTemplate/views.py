@@ -40,7 +40,6 @@ from flask_login import login_user, logout_user, current_user, login_required
 #        "answer3": "3",
 #        "answer4": "4"
 #      },
-#      "correct_answer": 2, // правильный ответ
 #      "count_of_answers": 4, // количество ответов
 #      "text": "1" // сам вопрос
 #    },
@@ -51,7 +50,6 @@ from flask_login import login_user, logout_user, current_user, login_required
 #        "answer3": "3_2",
 #        "answer4": "4_2"
 #      },
-#      "correct_answer": 4,
 #      "count_of_answers": 4,
 #      "text": "2"
 #    }
@@ -78,17 +76,42 @@ def get_block_info():
 
 
 
-#@app.route('/api/create_question',methods=['POST'])
-#def create_question():
-#    if (request.method=='POST'):
-#        data =request.get_json()
-#        text = data['text']
-#        q = Question(text=text)
-#        answers = Answers(answer1='Da',answer2='Net',answer3='Ya gay',answer4='huy',correct_answer=0)
-#        q.answers = answers
-#        db.session.add(q)
-#        db.session.commit()
-#        return jsonify(data)
+@app.route('/api/create_question',methods=['POST'])
+def create_question():
+    if (request.method =='POST'):
+        data = request.get_json()
+        text = data['text']
+        
+        if Question.query.filter_by(text=text).count() > 0:
+            return jsonify({"succsess":"exists, no", "text" : str(Question.query.filter_by(text=text).all())})
+
+        q = Question(text=text)
+        answers = Answers(answer1=data['ans1'], answer2=data['ans2'], answer3=data['ans3'], correct_answer=data['correct'])
+        answers.correct_answer = data["correct"]
+        answer4 = data.get('ans4')
+        answer5 = data.get('ans5')
+        answer6 = data.get('ans6')
+
+        if answer4 is not None:
+            answers.answer4 = answer4
+
+        if answer5 is not None:
+            answers.answer5 = answer5
+
+        if answer6 is not None:
+            answers.answer6 = answer6
+
+        q.answers = answers
+
+        block = Block.query.filter_by(block_type=data['id']).first()
+        if block.count() is None:
+            block = Block(block_type=data['id'])
+            db.session.add(block)
+
+        block.questions.append(q)
+
+        db.session.commit()
+        return jsonify({"succsess":"added, yes"})
 
 
 #ПОЛУЧИТЬ КОНКРЕТНЫЙ ВОПРОС?????
@@ -376,11 +399,6 @@ def registration():
         email = data['email']
         password = data['password']
     except KeyError:
-<<<<<<< HEAD
-        return jsonify({'status':0})
-    if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None or re.search(regex,email) is None or username.isalnum() is False:
-        return jsonify({'status':0,'desc':'check'})
-=======
         return jsonify({'status':'0'})
     
     if username == "" or email == "" or password == "":
@@ -392,7 +410,6 @@ def registration():
     #if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None:
         #return jsonify({'status':'0'})
     
->>>>>>> small_fixes
     user = User(username=username, email=email)
     user.set_password(password)
     db.session.add(user)
