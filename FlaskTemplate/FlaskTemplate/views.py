@@ -381,7 +381,10 @@ def registration():
     #if username == "" or email == "" or password == "":
         #return jsonify({'status':'0'})
 
-    if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None or re.search(regex,email) is None or email.isalnum() is False or username.isalnum() is False:
+    #if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None or re.search(regex,email) is None or email.isalnum() is False or username.isalnum() is False:
+        #return jsonify({'status':'0'})
+
+    if User.query.filter_by(username=username).first() is not None or ser.query.filter_by(email=email).first():
         return jsonify({'status':'0'})
     
     user = User(username=username, email=email)
