@@ -156,8 +156,9 @@ def get_question():
 #    }
 #  }
 #}
-@login_required
+
 @app.route('/api/check_answers', methods=['POST'])
+@login_required
 def check_answers():
     if (request.method == 'POST'):
         data = request.get_json()
@@ -226,8 +227,9 @@ def check_answers():
 #    }
 #  }
 #}
-@login_required
+
 @app.route('/api/tablescore',methods=['GET','POST'])
+@login_required
 def get_tablescore():
     q = User.query.order_by(User.score.desc())
     output_data = {'users':{}}
@@ -254,8 +256,9 @@ def get_tablescore():
 #    "2": 0 //блок неактивен
 #  }
 #}
-@login_required
+
 @app.route('/api/get_active_blocks',methods=['POST'])
+@login_required
 def get_active_blocks():
     if request.method=='POST':
         data = request.get_json()
@@ -273,12 +276,14 @@ def get_active_blocks():
 
 
 #ПОЛУЧИТЬ ПОЛЬЗОВАТЕЛЬСКУЮ ИНФОРМАЦИЮ
-@login_required
+
 @app.route('/api/get_user_info',methods=['POST'])
+@login_required
 def get_user_info():
     if request.method == 'POST':
         data = request.get_json()
         username = current_user.username
+
         u = User.query.filter_by(username=username).all()
         if (len(u)>0):
             u = u[0]
@@ -391,8 +396,9 @@ def login():
         return jsonify({'result' : '1'})
     return jsonify({'result' : '0'})
 
-@login_required
+
 @app.route('/api/logout', methods = ['POST'])
+@login_required
 def logout():
     logout_user()
     return jsonify({'result' : '1'})

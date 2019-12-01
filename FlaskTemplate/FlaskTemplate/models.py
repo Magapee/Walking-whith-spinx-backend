@@ -1,7 +1,7 @@
 from FlaskTemplate import app, lm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy 
-from .config import BaseConfig as Config
+from .config import DevelopmentConfig as Config
 from flask_mail import Mail
 from flask import jsonify
 from flask_migrate import Migrate
