@@ -12,17 +12,42 @@ from flask_login import login_user, logout_user, current_user, login_required
 
 
 
-#@app.route('/api/create_question',methods=['POST'])
-#def create_question():
-#    if (request.method=='POST'):
-#        data =request.get_json()
-#        text = data['text']
-#        q = Question(text=text)
-#        answers = Answers(answer1='Da',answer2='Net',answer3='Ya gay',answer4='huy',correct_answer=0)
-#        q.answers = answers
-#        db.session.add(q)
-#        db.session.commit()
-#        return jsonify(data)
+@app.route('/api/create_question',methods=['POST'])
+def create_question():
+     if (request.method =='POST'):
+        data = request.get_json()
+        text = data['text']
+        
+        if Question.query.filter_by(text=text).count() > 0:
+            return jsonify({"succsess":"exists, no", "text" : str(Question.query.filter_by(text=text).all())})
+
+        q = Question(text=text)
+        answers = Answers(answer1=data['ans1'], answer2=data['ans2'], answer3=data['ans3'], correct_answer=data['correct'])
+        answers.correct_answer = data["correct"]
+        answer4 = data.get('ans4')
+        answer5 = data.get('ans5')
+        answer6 = data.get('ans6')
+
+        if answer4 is not None:
+            answers.answer4 = answer4
+
+        if answer5 is not None:
+            answers.answer5 = answer5
+
+        if answer6 is not None:
+            answers.answer6 = answer6
+
+        q.answers = answers
+
+        block = Block.query.filter_by(block_type=data['id']).first()
+        if block is None:
+            block = Block(block_type=data['id'])
+            db.session.add(block)
+
+        block.questions.append(q)
+
+        db.session.commit()
+        return jsonify({"succsess":"added, yes"})
 
 #ПОЛУЧИТЬ ВОПРОСЫ И ИНФУ БЛОКА
 #ПОЛУЧАЮ

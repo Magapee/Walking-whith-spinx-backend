@@ -90,7 +90,7 @@ class Answers(db.Model):
     answer6 = db.Column(db.String,default="null")
     correct_answer = db.Column(db.Integer,default=-1)
     question_id = db.Column(db.Integer,db.ForeignKey('question.id'),nullable=False)
-
+    
 
     def get_Correct_Answer(self):
         return self.correct_answer
@@ -150,7 +150,7 @@ class Block(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     questions = db.relationship('Question',backref='block',lazy='dynamic')
     users = db.relationship('User',backref='block_users',secondary=assosication_table,lazy='dynamic')
-    type = db.Column(db.Integer)
+    block_type = db.Column(db.Integer)
 
     def get_Questions(self):
         count_of_questions = 0
