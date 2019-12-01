@@ -378,8 +378,8 @@ def registration():
     except KeyError:
         return jsonify({'status':0})
     
-    if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None or re.search(regex,email) is None or email.isalnum() is False or username.isalnum() is False:
-        return jsonify({'status':0})
+    if User.query.filter_by(username=username).first() is not None or User.query.filter_by(email=email).first() is not None or re.search(regex,email) is None or username.isalnum() is False:
+        return jsonify({'status':0,'desc':'check'})
     
     user = User(username=username, email=email)
     user.set_password(password)
@@ -434,7 +434,7 @@ def reset_password():
         output_data = {'status':0,'desc':'not found email in db'}
         return jsonify(output_data)
 
-@app.route('/api/check_code_password')
+@app.route('/api/check_code_password',methods=['POST'])
 def check_code_password():
     data = request.get_json()
     try:
@@ -448,6 +448,8 @@ def check_code_password():
     if query is not None:
         if (query.random_code == int(code)):
             query.set_password(password)
+            db.session.add(query)
+            db.session.commit()
             output_data = {'status':1}
         else:
             output_data = {'status':0,'desc':'incorrect_code'}
