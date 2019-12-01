@@ -71,6 +71,7 @@ def create_question():
     if (request.method =='POST'):
         data = request.get_json()
         text = data['text']
+
         
         if Question.query.filter_by(text=text).count() > 0:
             return jsonify({"succsess":"exists, no", "text" : str(Question.query.filter_by(text=text).all())})
@@ -172,13 +173,37 @@ def get_question():
 #  }
 #}
 
+@app.route('/api/check_answers_2',method=['POST'])
+@login_required
+def check_answers_2():
+    data =request.get_json()
+    username = current_user.username
+    try:
+        q_id = data['id']
+        user_answer = data['answer']
+    except KeyError:
+        output_data = jsonify({'status':'0','desc':'ID doesnt exist'})
+        return output_data
+    q = Question.query.filter_by(id=int(q_id)).first()
+    if q is not None:
+        correct_answer = q.get_Answer_str(q.get_Correct_Answer_int())
+        if (correct_answer==int(user_answer)):
+            username.score+=1
+            db.session.add(username)
+            db.session.commit()
+            status = 1
+        else:
+            status = 0    
+        return jsonify({'correct_answer':correct_answer,'status':status})
+
+
 @app.route('/api/check_answers', methods=['POST'])
 @login_required
 def check_answers():
     if (request.method == 'POST'):
         data = request.get_json()
         try:
-
+            
             dict_of_answers = data['answers']
             username = current_user.username
             block_id = data['id_block']
