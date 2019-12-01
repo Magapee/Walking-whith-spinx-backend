@@ -398,6 +398,6 @@ def logout():
     return jsonify({'result' : '1'})
 
 
-@login_manager.unauthorized_handler
+@lm.unauthorized_handler
 def unauthorized():
     return jsonify({'result' : '0'})
